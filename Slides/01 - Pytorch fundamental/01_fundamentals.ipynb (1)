@@ -1,0 +1,665 @@
+{
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "coSy5y6-UuLi"
+      },
+      "source": [
+        "# PyTorch Fundamentals"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "2RBpHTRbUuLj"
+      },
+      "source": [
+        "## 1. Tensor Basics\n",
+        "\n",
+        "A tensor is memory + metadata (shape, stride, dtype, device)."
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "HCJ2f1lcUuLk",
+        "outputId": "74155658-af6c-49e2-d9f0-4332586e6a4d"
+      },
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Tensor:\n",
+            "tensor([[1, 2, 3],\n",
+            "        [4, 5, 6]])\n",
+            "\n",
+            "Shape:   torch.Size([2, 3])\n",
+            "Stride:  (3, 1)\n",
+            "Dtype:   torch.int64\n",
+            "Device:  cpu\n",
+            "\n",
+            "Memory layout:\n",
+            "  MEMORY:     [1] [2] [3] [4] [5] [6]\n",
+            "  stride:     (3, 1)  <- jump 3 for rows, 1 for cols\n"
+          ]
+        }
+      ],
+      "source": [
+        "import torch\n",
+        "\n",
+        "x = torch.tensor([[1, 2, 3],\n",
+        "                  [4, 5, 6]])\n",
+        "\n",
+        "print(\"Tensor:\")\n",
+        "print(x)\n",
+        "print(f\"\\nShape:   {x.shape}\")\n",
+        "print(f\"Stride:  {x.stride()}\")\n",
+        "print(f\"Dtype:   {x.dtype}\")\n",
+        "print(f\"Device:  {x.device}\")\n",
+        "print(f\"\\nMemory layout:\")\n",
+        "print(\"  MEMORY:     [1] [2] [3] [4] [5] [6]\")\n",
+        "print(\"  stride:     (3, 1)  <- jump 3 for rows, 1 for cols\")"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "E8ch2yLnUuLk"
+      },
+      "source": [
+        "## 2. Creating Tensors with Gradient Tracking\n",
+        "\n",
+        "`requires_grad=True` tells PyTorch to track operations for automatic differentiation."
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "BRRT4JieUuLk",
+        "outputId": "92f79efb-fdd8-4540-c572-dab2dbd28194"
+      },
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "x = 0.5\n",
+            "y = 100.0\n",
+            "w = 50.0 (requires_grad=True)\n",
+            "b = 0.0 (requires_grad=False)\n"
+          ]
+        }
+      ],
+      "source": [
+        "import torch\n",
+        "\n",
+        "# Input data\n",
+        "x = torch.tensor([[0.5]])\n",
+        "y = torch.tensor([[100.0]])\n",
+        "\n",
+        "# Parameters - w needs gradients, b is fixed\n",
+        "w = torch.tensor([[50.0]], requires_grad=True)\n",
+        "b = torch.tensor([[0.0]], requires_grad=False)\n",
+        "\n",
+        "print(f\"x = {x.item()}\")\n",
+        "print(f\"y = {y.item()}\")\n",
+        "print(f\"w = {w.item()} (requires_grad={w.requires_grad})\")\n",
+        "print(f\"b = {b.item()} (requires_grad={b.requires_grad})\")"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "aY7XONXZUuLl"
+      },
+      "source": [
+        "## 3. Forward Pass"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "YZQxqwcOUuLl",
+        "outputId": "8d99385e-6b2a-4fad-8564-8f887ebbf394"
+      },
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Prediction: y_pred = 25.00\n",
+            "Target:     y      = 100.00\n",
+            "Loss (MSE):        = 5625.00\n"
+          ]
+        }
+      ],
+      "source": [
+        "import torch\n",
+        "\n",
+        "# Setup\n",
+        "x = torch.tensor([[0.5]])\n",
+        "y = torch.tensor([[100.0]])\n",
+        "w = torch.tensor([[50.0]], requires_grad=True)\n",
+        "b = torch.tensor([[0.0]], requires_grad=False)\n",
+        "\n",
+        "# Forward pass: matrix multiplication + bias\n",
+        "y_pred = x @ w + b  # @ is matrix multiplication (same as torch.matmul)\n",
+        "loss = ((y_pred - y) ** 2).mean()\n",
+        "\n",
+        "print(f\"Prediction: y_pred = {y_pred.item():.2f}\")\n",
+        "print(f\"Target:     y      = {y.item():.2f}\")\n",
+        "print(f\"Loss (MSE):        = {loss.item():.2f}\")"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "ZUJoQTmeUuLl"
+      },
+      "source": [
+        "## 4. Backward Pass\n",
+        "\n",
+        "`.backward()` computes ALL gradients automatically via chain rule."
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "6aebfogMUuLl",
+        "outputId": "22914dad-af40-46f4-8c6c-0e12adb2395c"
+      },
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Gradient w.r.t. w: tensor([[-75.]])\n",
+            "Gradient w.r.t. b: tensor([[-150.]])\n"
+          ]
+        }
+      ],
+      "source": [
+        "import torch\n",
+        "\n",
+        "# Setup\n",
+        "x = torch.tensor([[0.5]])\n",
+        "y = torch.tensor([[100.0]])\n",
+        "w = torch.tensor([[50.0]], requires_grad=True)\n",
+        "b = torch.tensor([[0.0]], requires_grad=True)\n",
+        "\n",
+        "# Forward pass\n",
+        "y_pred = x @ w + b\n",
+        "loss = ((y_pred - y) ** 2).mean()\n",
+        "\n",
+        "# Backward pass - ONE line!\n",
+        "loss.backward()\n",
+        "\n",
+        "print(f\"Gradient w.r.t. w: {w.grad}\")  # dL/dw\n",
+        "print(f\"Gradient w.r.t. b: {b.grad}\")  # None - requires_grad=False"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "WriCELT5UuLl"
+      },
+      "source": [
+        "## 5. Understanding the Gradient\n",
+        "\n",
+        "Manual derivative: dL/dw = -2 * x * (y - (w*x + b))\n",
+        "\n",
+        "For x=0.5, y=100, w=50, b=0:\n",
+        "dL/dw = -2 * 0.5 * (100 - 25) = -75"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "WLFxsQ_bUuLm",
+        "outputId": "e59c4052-4f06-415b-947c-9ae5bcf5fbf2"
+      },
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Manual gradient:  -75.00\n",
+            "PyTorch gradient: -75.00\n",
+            "Match: True\n"
+          ]
+        }
+      ],
+      "source": [
+        "import torch\n",
+        "\n",
+        "# Verify gradient computation manually\n",
+        "x = 0.5\n",
+        "y = 100.0\n",
+        "w = 50.0\n",
+        "b = 0.0\n",
+        "\n",
+        "# Manual derivative: d/dw (y - (w*x + b))^2 = -2*x*(y - (w*x + b))\n",
+        "manual_grad = -2 * x * (y - (w * x + b))\n",
+        "\n",
+        "# Using PyTorch\n",
+        "x_t = torch.tensor([[x]])\n",
+        "y_t = torch.tensor([[y]])\n",
+        "w_t = torch.tensor([[w]], requires_grad=True)\n",
+        "b_t = torch.tensor([[b]])\n",
+        "\n",
+        "y_pred = x_t @ w_t + b_t\n",
+        "loss = ((y_pred - y_t) ** 2).mean()\n",
+        "loss.backward()\n",
+        "\n",
+        "print(f\"Manual gradient:  {manual_grad:.2f}\")\n",
+        "print(f\"PyTorch gradient: {w_t.grad.item():.2f}\")\n",
+        "print(f\"Match: {abs(manual_grad - w_t.grad.item()) < 1e-6}\")"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "cRcw0oUmUuLm"
+      },
+      "source": [
+        "## 6. Complete Gradient Descent Step\n",
+        "\n",
+        "The four steps of optimization:\n",
+        "1. Forward pass\n",
+        "2. Backward pass\n",
+        "3. Update parameters\n",
+        "4. Zero gradients"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "_LsPA0K-UuLm"
+      },
+      "outputs": [],
+      "source": [
+        "import torch\n",
+        "\n",
+        "# Setup\n",
+        "x = torch.tensor([[0.5]])\n",
+        "y = torch.tensor([[100.0]])\n",
+        "w = torch.tensor([[50.0]], requires_grad=True)\n",
+        "b = torch.tensor([[0.0]], requires_grad=True)\n",
+        "\n",
+        "lr = 0.1  # Learning rate (alpha)\n",
+        "\n",
+        "print(f\"Before: w = {w.item():.2f}, b = {b.item():.2f}\")\n",
+        "\n",
+        "# 1. Forward pass\n",
+        "y_pred = x @ w + b\n",
+        "loss = ((y_pred - y) ** 2).mean()\n",
+        "\n",
+        "# 2. Backward pass\n",
+        "loss.backward()\n",
+        "\n",
+        "# 3. Update parameters (inside no_grad context)\n",
+        "with torch.no_grad():\n",
+        "    w -= lr * w.grad\n",
+        "    b -= lr * b.grad\n",
+        "\n",
+        "    # 4. Zero gradients for next iteration\n",
+        "    w.grad = None\n",
+        "    b.grad = None\n",
+        "\n",
+        "print(f\"After:  w = {w.item():.2f}, b = {b.item():.2f}\")\n",
+        "print(f\"Gradients cleared: w.grad = {w.grad}, b.grad = {b.grad}\")"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "VSLvYqPLUuLm"
+      },
+      "source": [
+        "## 7. Full Training Loop"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "ApdjvjOhUuLm",
+        "outputId": "4ee72467-bd18-421b-80eb-f39a6bfabf04"
+      },
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Trained parameters:\n",
+            "  w = 200.00\n",
+            "  b = 0.00\n",
+            "\n",
+            "Final prediction: y_pred = 100.00\n",
+            "True target:     y      = 100.00\n"
+          ]
+        }
+      ],
+      "source": [
+        "import torch\n",
+        "\n",
+        "# Setup data\n",
+        "x = torch.tensor([[0.5]])\n",
+        "y = torch.tensor([[100.0]])\n",
+        "\n",
+        "# Initialize parameters\n",
+        "w = torch.tensor([[50.0]], requires_grad=True)\n",
+        "b = torch.tensor([[0.0]], requires_grad=False)\n",
+        "\n",
+        "# Training loop\n",
+        "for epoch in range(50000):\n",
+        "    # Forward pass\n",
+        "    y_pred = x @ w + b\n",
+        "    loss = ((y_pred - y) ** 2).mean()\n",
+        "\n",
+        "    # Backward pass\n",
+        "    loss.backward()\n",
+        "\n",
+        "    # Update with no_grad to avoid tracking the update itself\n",
+        "    with torch.no_grad():\n",
+        "        w -= 0.1 * w.grad\n",
+        "        # b -= 0.1 * b.grad\n",
+        "        w.grad = None\n",
+        "        # b.grad = None\n",
+        "\n",
+        "print(f\"Trained parameters:\")\n",
+        "print(f\"  w = {w.item():.2f}\")\n",
+        "print(f\"  b = {b.item():.2f}\")\n",
+        "print(f\"\\nFinal prediction: y_pred = {(x @ w + b).item():.2f}\")\n",
+        "print(f\"True target:     y      = {y.item():.2f}\")"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "ZQYuULsoUuLm"
+      },
+      "source": [
+        "## 8. Using `nn.Linear` - Built-in Linear Layer\n",
+        "\n",
+        "`nn.Linear(in_features, out_features)` implements y = x @ W.t() + b"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "x2SI7cL7UuLm"
+      },
+      "outputs": [],
+      "source": [
+        "import torch\n",
+        "import torch.nn as nn\n",
+        "\n",
+        "# Create a linear layer: 1 input, 1 output\n",
+        "model = nn.Linear(1, 1)\n",
+        "\n",
+        "# Inspect parameters\n",
+        "print(\"Linear layer parameters:\")\n",
+        "for name, param in model.named_parameters():\n",
+        "    print(f\"  {name}: shape={param.shape}, value={param.item():.4f}\")\n",
+        "\n",
+        "# Use the model\n",
+        "x = torch.tensor([[0.5]])\n",
+        "y_pred = model(x)\n",
+        "print(f\"\\nInput:    {x.item()}\")\n",
+        "print(f\"Output:   {y_pred.item():.4f}\")"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "vy51fCfcUuLn"
+      },
+      "source": [
+        "## 9. Custom Model with `nn.Module`\n",
+        "\n",
+        "`nn.Module` is the base class for all neural network modules."
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "gBxOMsygUuLn",
+        "outputId": "b048d530-87c3-41aa-bfbf-0dc9a4b6ebef"
+      },
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "LinearModel output: 0.9678\n",
+            "FFN output:         -0.2771\n"
+          ]
+        }
+      ],
+      "source": [
+        "import torch\n",
+        "from torch import nn\n",
+        "\n",
+        "# Alternative: Feed-Forward Network with two layers\n",
+        "class FFN(nn.Module):\n",
+        "    def __init__(self):\n",
+        "        super().__init__()\n",
+        "        self.linear1 = nn.Linear(1, 1)\n",
+        "        self.linear2 = nn.Linear(1, 1)\n",
+        "\n",
+        "    def forward(self, x):\n",
+        "        x = self.linear1(x)\n",
+        "        x = self.linear2(x)\n",
+        "        return x\n",
+        "\n",
+        "# Create and use models\n",
+        "model1 = nn.Linear(1, 1)\n",
+        "model2 = FFN()\n",
+        "\n",
+        "x = torch.tensor([[0.5]])\n",
+        "print(f\"LinearModel output: {model1(x).item():.4f}\")\n",
+        "print(f\"FFN output:         {model2(x).item():.4f}\")"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "model1.weight.data = torch.tensor([[0.5]])\n",
+        "model1.bias.data = torch.tensor([0.])\n",
+        "\n",
+        "list(model1.parameters())"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "DWnnVbcglTZt",
+        "outputId": "a8fcf14c-542b-49ba-fe77-2f22ca5c2345"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "[Parameter containing:\n",
+              " tensor([[0.5000]], requires_grad=True),\n",
+              " Parameter containing:\n",
+              " tensor([0.], requires_grad=True)]"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 22
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "UoyLygDaUuLn"
+      },
+      "source": [
+        "## 10. `nn.ModuleList` - Storing Multiple Layers\n",
+        "\n",
+        "Use `ModuleList` instead of plain Python lists so PyTorch registers the parameters."
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "nC1CnsoiUuLn"
+      },
+      "outputs": [],
+      "source": [
+        "import torch\n",
+        "import torch.nn as nn\n",
+        "\n",
+        "class MyModel(nn.Module):\n",
+        "    def __init__(self, num_layers=3):\n",
+        "        super().__init__()\n",
+        "        self.layers = nn.ModuleList([\n",
+        "            nn.Linear(1, 1) for _ in range(num_layers)\n",
+        "        ])\n",
+        "\n",
+        "    def forward(self, x):\n",
+        "        for layer in self.layers:\n",
+        "            x = layer(x)\n",
+        "        return x\n",
+        "\n",
+        "# Create model and check parameters are registered\n",
+        "model = MyModel(num_layers=3)\n",
+        "print(\"Model parameters:\")\n",
+        "for name, param in model.named_parameters():\n",
+        "    print(f\"  {name}: {param.shape}\")\n",
+        "\n",
+        "print(f\"\\nTotal parameters: {sum(p.numel() for p in model.parameters())}\")"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "UPXGT7LIUuLn"
+      },
+      "source": [
+        "## 11. `nn.Parameter` - Registering Custom Tensors\n",
+        "\n",
+        "Wrap tensors in `nn.Parameter` so they're tracked by the module."
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "CzcgN3KrUuLn"
+      },
+      "outputs": [],
+      "source": [
+        "import torch\n",
+        "import torch.nn as nn\n",
+        "\n",
+        "class MyModel(nn.Module):\n",
+        "    def __init__(self):\n",
+        "        super().__init__()\n",
+        "        self.W = nn.Parameter(torch.randn(1, 1))\n",
+        "        self.b = nn.Parameter(torch.zeros(1, 1))\n",
+        "\n",
+        "    def forward(self, x):\n",
+        "        return x @ self.W + self.b\n",
+        "\n",
+        "model = MyModel()\n",
+        "print(\"Custom parameters:\")\n",
+        "for name, param in model.named_parameters():\n",
+        "    print(f\"  {name}: {param.item():.4f} (requires_grad={param.requires_grad})\")\n",
+        "\n",
+        "x = torch.tensor([[0.5]])\n",
+        "y_pred = model(x)\n",
+        "print(f\"\\nOutput: {y_pred.item():.4f}\")"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "ZjHWZXYQUuLn"
+      },
+      "source": [
+        "## 12. Built-in Loss Functions\n",
+        "\n",
+        "PyTorch provides common loss functions in `nn.functional` and `nn`."
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "WKct-zrLUuLo"
+      },
+      "outputs": [],
+      "source": [
+        "import torch\n",
+        "import torch.nn.functional as F\n",
+        "from torch import nn\n",
+        "\n",
+        "y_pred = torch.tensor([2.5, 0.3, 1.8])\n",
+        "y_true = torch.tensor([3.0, -0.5, 2.0])\n",
+        "\n",
+        "loss1 = ((y_pred - y_true) ** 2).mean()\n",
+        "loss2 = F.mse_loss(y_pred, y_true)\n",
+        "loss3 = nn.MSELoss()(y_pred, y_true)\n",
+        "\n",
+        "print(\"MSE Loss (all equivalent):\")\n",
+        "print(f\"  Manual:    {loss1:.6f}\")\n",
+        "print(f\"  F.mse_loss:   {loss2:.6f}\")\n",
+        "print(f\"  nn.MSELoss:   {loss3:.6f}\")"
+      ]
+    }
+  ],
+  "metadata": {
+    "kernelspec": {
+      "display_name": "Python 3",
+      "language": "python",
+      "name": "python3"
+    },
+    "language_info": {
+      "name": "python",
+      "version": "3.12.0"
+    },
+    "colab": {
+      "provenance": []
+    }
+  },
+  "nbformat": 4,
+  "nbformat_minor": 0
+}
