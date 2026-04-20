@@ -9,7 +9,7 @@
 
 ---
 
-## 📌 Official Course Links
+## Official Course Links
 
 | Type | Link |
 |------|------|
@@ -19,7 +19,7 @@
 
 ---
 
-## 🗓️ Lectures List
+## Lectures List
 
 | # | Topic | YouTube Live Link (if available) |
 |---|-------|----------------------------------|
@@ -38,7 +38,7 @@
 
 ---
 
-## 📚 Assignments (GitHub Classroom)
+## Assignments (GitHub Classroom)
 
 | Assignment | Link |
 |------------|------|
@@ -56,7 +56,7 @@
 
 ---
 
-## 📝 Important Clarifications & Q&A (from course discussions)
+## Important Clarifications & Q&A (from course discussions)
 
 ### 1. Correction about Softmax + Loss formula (Lecture 2)
 The slide initially showed a `+` sign between Softmax and Loss, implying simple addition. This is **incorrect**. The combined loss is formed differently (mathematical details not required, but the instructor corrected it).
@@ -78,21 +78,21 @@ Some participants faced an error where the `tokenizer` parameter is no longer re
 
 ---
 
-## 📖 Recommended Reading
+## Recommended Reading
 
 - **Meta research paper on Hallucination in LLMs** (shared by Ibrahim Mayhoub) – highly recommended for understanding model faithfulness.  
   (Link to be added if available)
 
 ---
 
-## 🔧 Dataset used in practical session
+## Dataset used in practical session
 
 - **L-HSAB**: First Arabic Levantine Hate Speech Dataset  
   [https://github.com/Hala-Mulki/L-HSAB-First-Arabic-Levantine-HateSpeech-Dataset/blob/master/Dataset/L-HSAB](https://github.com/Hala-Mulki/L-HSAB-First-Arabic-Levantine-HateSpeech-Dataset/blob/master/Dataset/L-HSAB)
 
 ---
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 Special thanks to **Rayene Bech**, **Muhanad Tuameh**, and **Mohammed Besher Al-Kurdi** for organizing and delivering this excellent course. Thanks also to all participants for their questions and contributions.
 
